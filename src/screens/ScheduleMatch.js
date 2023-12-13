@@ -79,6 +79,8 @@ const ScheduleMatch = ({navigation, ...props}) => {
 
   const validation = () => {
     let status = true;
+    const timeOverlap = checkOverlapping(selected, startTime, endTime);
+
     if (!selected) {
       Alert.alert('', 'Please select Date of schedule');
       status = false;
@@ -91,23 +93,40 @@ const ScheduleMatch = ({navigation, ...props}) => {
     } else if (!text) {
       Alert.alert('', 'Please select Title of match');
       status = false;
+    } else if (timeOverlap.isOverlap) {
+      Alert.alert(
+        '',
+        'Selected slots is already booked. Please select another slots.',
+      );
+      status = false;
     }
     return status;
   };
 
-  const checkOverlapping = (date, time) => {
+  const checkOverlapping = (date, t1, t2) => {
+    if (!t1 || !t2) {
+      return {isOverlap: false, bookedSlots: []};
+    }
     const bookedSlots = [];
     let isOverlap = false;
     data.map(item => {
       if (item.date === date) {
         bookedSlots.push(item);
         if (
-          moment(time, 'hh:mm A').isSame(moment(item.startTime, 'hh:mm A')) ||
-          moment(time, 'hh:mm A').isSame(moment(item.endTime, 'hh:mm A')) ||
-          moment(time, 'hh:mm A').isBetween(
-            moment(item.startTime, 'hh:mm A'),
-            moment(item.endTime, 'hh:mm A'),
-          )
+          moment(item.startTime, 'hh:mm A').isSame(moment(t1, 'hh:mm A')) ||
+          moment(item.startTime, 'hh:mm A').isSame(moment(t2, 'hh:mm A')) ||
+          moment(item.startTime, 'hh:mm A').isBetween(
+            moment(t1, 'hh:mm A'),
+            moment(t2, 'hh:mm A'),
+          ) ||
+          moment(item.endTime, 'hh:mm A').isSame(moment(t1, 'hh:mm A')) ||
+          moment(item.endTime, 'hh:mm A').isSame(moment(t2, 'hh:mm A')) ||
+          moment(item.endTime, 'hh:mm A').isBetween(
+            moment(t1, 'hh:mm A'),
+            moment(t2, 'hh:mm A'),
+          ) ||
+          (moment(item.startTime, 'hh:mm A').isBefore(moment(t1, 'hh:mm A')) &&
+            moment(item.endTime, 'hh:mm A').isAfter(moment(t2, 'hh:mm A')))
         ) {
           isOverlap = true;
         }
@@ -125,6 +144,7 @@ const ScheduleMatch = ({navigation, ...props}) => {
           value={text}
           onChangeText={setText}
           placeholder="Please enter title"
+          placeholderTextColor={'#ABABAB'}
           multiline
           style={styles.textInput}
         />
@@ -208,8 +228,7 @@ const ScheduleMatch = ({navigation, ...props}) => {
         date={startTime ? new Date(moment(startTime, 'hh:mm A')) : new Date()}
         onConfirm={newTime => {
           setOpenStart(false);
-
-          const ov = checkOverlapping(selected, newTime);
+          const ov = checkOverlapping(selected, newTime, endTime);
           if (ov.isOverlap) {
             setSlots(ov);
           } else {
@@ -230,7 +249,7 @@ const ScheduleMatch = ({navigation, ...props}) => {
         date={endTime ? new Date(moment(endTime, 'hh:mm A')) : new Date()}
         onConfirm={newTime => {
           setOpenEnd(false);
-          const ov = checkOverlapping(selected, newTime);
+          const ov = checkOverlapping(selected, startTime, newTime);
           if (ov.isOverlap) {
             setSlots(ov);
           } else {
@@ -266,6 +285,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5edfb',
     borderRadius: 10,
     paddingHorizontal: 15,
+    color: '#000000',
   },
   date: {
     fontSize: 16,

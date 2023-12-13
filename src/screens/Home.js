@@ -74,7 +74,7 @@ const Home = ({navigation}) => {
       <StatusBar backgroundColor={'#f5edfb'} barStyle={'dark-content'} />
 
       <View style={styles.button}>
-        <View style={{flex: 0.9}}>
+        <View style={{}}>
           <Text style={styles.buttonText}>Schedule New Match</Text>
         </View>
         <TouchableOpacity
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginVertical: 20,
     padding: 15,
-    // justifyContent: 'space-between',
+    justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
   },
@@ -162,9 +162,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     padding: 10,
     borderRadius: 10,
-    flex: 0.1,
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 3,
   },
 });
 
